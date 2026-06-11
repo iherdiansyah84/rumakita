@@ -1,0 +1,51 @@
+<?php
+
+return [
+    'modules' => [
+        'dashboard'   => ['view'],
+        'perumahan'   => ['view', 'create', 'update', 'delete'],
+        'warga'       => ['view', 'create', 'update', 'delete', 'export'],
+        'keuangan'    => ['view', 'create', 'update', 'delete', 'export'],
+        'tagihan'     => ['view', 'create', 'update', 'delete'],
+        'pembayaran'  => ['view', 'create', 'update', 'delete'],
+        'forum'       => ['view', 'create', 'update', 'delete', 'like', 'comment'],
+        'galeri'      => ['view', 'create', 'update', 'delete'],
+        'voting'      => ['view', 'create', 'update', 'delete', 'vote'],
+        'agenda'      => ['view', 'create', 'update', 'delete'],
+        'marketplace' => ['view', 'create', 'update', 'delete'],
+        'laporan'     => ['view', 'export'],
+        'users'       => ['view', 'create', 'update', 'delete'],
+        'roles'       => ['view', 'create', 'update', 'delete'],
+    ],
+
+    'pengurus' => [
+        'dashboard'   => ['view'],
+        'perumahan'   => ['view', 'create', 'update', 'delete'],
+        'warga'       => ['view', 'create', 'update', 'delete', 'export'],
+        'keuangan'    => ['view', 'create', 'update', 'delete', 'export'],
+        'tagihan'     => ['view', 'create', 'update', 'delete'],
+        'pembayaran'  => ['view', 'create', 'update', 'delete'],
+        'forum'       => ['view', 'create', 'update', 'delete', 'like', 'comment'],
+        'galeri'      => ['view', 'create', 'update', 'delete'],
+        'voting'      => ['view', 'create', 'update', 'delete', 'vote'],
+        'agenda'      => ['view', 'create', 'update', 'delete'],
+        'marketplace' => ['view', 'create', 'update', 'delete'],
+        'laporan'     => ['view', 'export'],
+        'users'       => ['view', 'create', 'update', 'delete'],
+        'roles'       => ['view', 'create', 'update', 'delete'],
+    ],
+
+    'warga' => [
+        'dashboard'   => ['view'],
+        'perumahan'   => ['view'],
+        'warga'       => ['view', 'update'],
+        'keuangan'    => ['view'],
+        'tagihan'     => ['view'],
+        'pembayaran'  => ['view', 'create'],
+        'forum'       => ['view', 'create', 'update', 'delete', 'like', 'comment'],
+        'galeri'      => ['view', 'create', 'update', 'delete'],
+        'voting'      => ['view', 'vote'],
+        'agenda'      => ['view'],
+        'marketplace' => ['view', 'create', 'update', 'delete'],
+    ],
+];
