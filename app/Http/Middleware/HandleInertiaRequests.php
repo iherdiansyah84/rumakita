@@ -41,6 +41,7 @@ class HandleInertiaRequests extends Middleware
                     'role_id'    => $user->role_id,
                     'role_name'  => $user->role?->name,
                     'role_label' => $user->role?->label,
+                    'unreadNotifications' => $user->unreadNotifications,
                 ] : null,
                 'permissions' => $user && $user->role
                     ? $user->role->load('permissions')->getPermissionsMap()

@@ -13,15 +13,26 @@ class Marketplace extends Model
     protected $table = 'marketplace';
 
     protected $fillable = [
-        'perumahan_id', 'user_id', 'judul', 'deskripsi', 'harga', 'kategori', 'gambar', 'status',
+        'perumahan_id', 'user_id', 'judul', 'deskripsi', 'harga', 'kategori', 'tipe_iklan', 'gambar', 'status',
     ];
 
     protected $casts = [
         'harga' => 'integer',
+        'gambar' => 'array',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function pesanans()
+    {
+        return $this->hasMany(PesananMarketplace::class);
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(MarketplaceLike::class);
     }
 }

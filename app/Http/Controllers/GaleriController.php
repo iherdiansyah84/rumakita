@@ -63,11 +63,31 @@ class GaleriController extends Controller
             'judul'            => 'required|string|max:255',
             'tanggal_kegiatan' => 'required|date',
             'kategori'         => 'required|string|max:100',
+            'foto.*'           => 'nullable|image|max:5120',
         ]);
 
         $galeri->update($validated);
 
+        if ($request->hasFile('foto')) {
+            foreach ($request->file('foto') as $file) {
+                $path = $file->store('galeri', 'public');
+                $galeri->foto()->create(['path' => $path]);
+            }
+        }
+
         return back()->with('success', 'Album galeri berhasil diperbarui.');
+    }
+
+    public function destroyFoto(\App\Models\GaleriFoto $foto): RedirectResponse
+    {
+        if ($foto->galeri->user_id !== auth()->id() && auth()->user()->role->name !== 'super_admin' && auth()->user()->role->name !== 'pengurus') {
+            abort(403);
+        }
+
+        Storage::disk('public')->delete($foto->path);
+        $foto->delete();
+
+        return back()->with('success', 'Foto berhasil dihapus.');
     }
 
     public function destroy(Galeri $galeri): RedirectResponse

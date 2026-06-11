@@ -3,7 +3,7 @@ import { Link, router, usePage } from "@inertiajs/react";
 import {
   Home, Building2, Users, Wallet, MessageSquare,
   Settings, BarChart3, Vote, ShoppingBag, Image, Calendar,
-  ChevronLeft, ChevronRight, ChevronDown, LogOut, UserCog, Shield, User,
+  ChevronLeft, ChevronRight, ChevronDown, LogOut, UserCog, Shield, User, FileText
 } from "lucide-react";
 import { useAuth } from "../../../hooks/useRole";
 
@@ -27,6 +27,7 @@ const modules: Module[] = [
   { id: "galeri",       href: "/galeri",       icon: Image,         label: "Galeri",        permission: "galeri.view" },
   { id: "voting",       href: "/voting",       icon: Vote,          label: "Voting",        permission: "voting.view" },
   { id: "agenda",       href: "/agenda",       icon: Calendar,      label: "Agenda",        permission: "agenda.view" },
+  { id: "surat",        href: "/surat",        icon: FileText,      label: "Surat Digital", permission: "surat.view" },
   { id: "laporan",      href: "/laporan",      icon: BarChart3,     label: "Laporan",       permission: "laporan.view" },
 ];
 

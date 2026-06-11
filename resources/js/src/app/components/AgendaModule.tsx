@@ -12,11 +12,16 @@ type Agenda = {
   lokasi: string;
   tipe: string;
   penyelenggara: string;
-  max_peserta: number | null;
+  peserta_ids: number[] | null;
+  hadir_ids?: number[] | null;
+  tidak_hadir_ids?: number[] | null;
+  alasan_tidak_hadir?: Record<string, string> | null;
+  reminder_minutes: number | null;
   status: "upcoming" | "ongoing" | "completed";
 };
 
-type Props = { agenda: Agenda[] };
+type Warga = { id: number; name: string; };
+type Props = { agenda: Agenda[]; wargaList?: Warga[] };
 
 const TIPE_OPTIONS = ["Gotong Royong", "Rapat", "Kesehatan", "Olahraga", "Keagamaan", "Lainnya"];
 
@@ -28,14 +33,21 @@ const statusColor: Record<string, string> = {
 
 const emptyForm = {
   judul: "", tanggal: "", waktu_mulai: "", waktu_selesai: "",
-  lokasi: "", tipe: "Lainnya", penyelenggara: "", max_peserta: "", status: "upcoming" as const,
+  lokasi: "", tipe: "Lainnya", penyelenggara: "", 
+  peserta_ids: [] as number[], reminder_minutes: "", status: "upcoming" as const,
 };
 
-export function AgendaModule({ agenda = [] }: Props) {
-  const { can } = useAuth();
+export function AgendaModule({ agenda = [], wargaList = [] }: Props) {
+  const { can, user } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Agenda | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [reasonModal, setReasonModal] = useState<{ id: number; show: boolean }>({ id: 0, show: false });
+  const [alasan, setAlasan] = useState("");
+
+  const confirmKehadiran = (id: number, status: 'hadir' | 'tidak_hadir', reason?: string) => {
+    router.post(`/agenda/${id}/konfirmasi`, { status, alasan: reason }, { preserveScroll: true });
+  };
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -56,7 +68,8 @@ export function AgendaModule({ agenda = [] }: Props) {
       lokasi:        a.lokasi,
       tipe:          a.tipe,
       penyelenggara: a.penyelenggara,
-      max_peserta:   a.max_peserta != null ? String(a.max_peserta) : "",
+      peserta_ids:   a.peserta_ids || [],
+      reminder_minutes: a.reminder_minutes != null ? String(a.reminder_minutes) : "",
       status:        a.status,
     });
     setErrors({});
@@ -65,7 +78,11 @@ export function AgendaModule({ agenda = [] }: Props) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const payload = { ...form, max_peserta: form.max_peserta ? Number(form.max_peserta) : null };
+    const payload = { 
+        ...form, 
+        peserta_ids: form.peserta_ids.length > 0 ? form.peserta_ids : null,
+        reminder_minutes: form.reminder_minutes ? Number(form.reminder_minutes) : null 
+    };
 
     if (editing) {
       router.patch(`/agenda/${editing.id}`, payload, {
@@ -86,7 +103,7 @@ export function AgendaModule({ agenda = [] }: Props) {
   }
 
   const upcoming = agenda.filter((a) => a.status !== "completed");
-  const totalPeserta = agenda.reduce((s, a) => s + (a.max_peserta ?? 0), 0);
+  const totalPeserta = agenda.reduce((s, a) => s + (a.peserta_ids?.length || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -123,7 +140,7 @@ export function AgendaModule({ agenda = [] }: Props) {
           <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
             <Users className="w-6 h-6 text-purple-600" />
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Total Kapasitas</p>
+          <p className="text-sm text-muted-foreground mb-1">Total Undangan</p>
           <p className="text-3xl font-semibold text-foreground">{totalPeserta}</p>
         </div>
       </div>
@@ -178,11 +195,23 @@ export function AgendaModule({ agenda = [] }: Props) {
                 <p className="text-sm text-muted-foreground">
                   Penyelenggara: <span className="font-medium text-foreground">{a.penyelenggara}</span>
                 </p>
-                {a.max_peserta && (
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                {a.peserta_ids && a.peserta_ids.length > 0 && (
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
                     <Users className="w-4 h-4" />
-                    <span>Maks. {a.max_peserta} peserta</span>
+                    <span>Undangan: {a.peserta_ids.length} orang (Hadir: {a.hadir_ids?.length || 0}, Tidak Hadir: {a.tidak_hadir_ids?.length || 0})</span>
                   </div>
+                )}
+                {a.peserta_ids?.includes(user?.id as number) && (
+                   <div className="mt-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                     <p className="text-xs font-medium text-foreground mb-2">Konfirmasi Kehadiran Anda:</p>
+                     <div className="flex gap-2">
+                       <button onClick={() => confirmKehadiran(a.id, 'hadir')} className={`text-xs px-3 py-1.5 rounded-md ${a.hadir_ids?.includes(user?.id as number) ? 'bg-primary text-white font-semibold' : 'bg-background border border-border hover:bg-muted text-foreground'}`}>Hadir</button>
+                       <button onClick={() => {
+                           setReasonModal({ id: a.id, show: true });
+                           setAlasan(a.alasan_tidak_hadir?.[String(user?.id)] || "");
+                       }} className={`text-xs px-3 py-1.5 rounded-md ${a.tidak_hadir_ids?.includes(user?.id as number) ? 'bg-destructive text-white font-semibold' : 'bg-background border border-border hover:bg-muted text-foreground'}`}>Tidak Hadir</button>
+                     </div>
+                   </div>
                 )}
               </div>
             </div>
@@ -244,10 +273,43 @@ export function AgendaModule({ agenda = [] }: Props) {
                     className="w-full px-3 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-ring" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Maks. Peserta</label>
-                  <input type="number" min="1" value={form.max_peserta} onChange={(e) => setForm({ ...form, max_peserta: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <label className="block text-sm font-medium mb-1">Pengingat (Menit Sebelum Acara)</label>
+                  <input type="number" min="1" value={form.reminder_minutes} onChange={(e) => setForm({ ...form, reminder_minutes: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Contoh: 30" />
                 </div>
+              </div>
+              <div>
+                  <div className="flex items-center justify-between mb-1">
+                      <label className="block text-sm font-medium">Peserta Warga</label>
+                      <button type="button" onClick={() => {
+                          if (form.peserta_ids.length === wargaList.length) {
+                              setForm({ ...form, peserta_ids: [] });
+                          } else {
+                              setForm({ ...form, peserta_ids: wargaList.map(w => w.id) });
+                          }
+                      }} className="text-xs text-primary hover:underline">
+                          {form.peserta_ids.length === wargaList.length ? "Hapus Semua" : "Pilih Semua"}
+                      </button>
+                  </div>
+                  <div className="border border-border rounded-lg p-2 max-h-40 overflow-y-auto bg-input-background grid grid-cols-2 gap-2">
+                      {wargaList.map(w => (
+                          <label key={w.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 p-1 rounded">
+                              <input type="checkbox" 
+                                  checked={form.peserta_ids.includes(w.id)}
+                                  onChange={(e) => {
+                                      if (e.target.checked) {
+                                          setForm({ ...form, peserta_ids: [...form.peserta_ids, w.id] });
+                                      } else {
+                                          setForm({ ...form, peserta_ids: form.peserta_ids.filter(id => id !== w.id) });
+                                      }
+                                  }}
+                                  className="rounded border-border text-primary focus:ring-primary"
+                              />
+                              {w.name}
+                          </label>
+                      ))}
+                      {wargaList.length === 0 && <p className="text-xs text-muted-foreground col-span-2 p-2">Tidak ada data warga.</p>}
+                  </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Status *</label>
@@ -275,6 +337,28 @@ export function AgendaModule({ agenda = [] }: Props) {
             <div className="flex gap-3">
               <button onClick={() => setDeleteId(null)} className="flex-1 py-2 rounded-lg border border-border hover:bg-muted transition-colors">Batal</button>
               <button onClick={handleDelete} className="flex-1 py-2 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors">Hapus</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {reasonModal.show && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-xl border border-border w-full max-w-sm p-6">
+            <h2 className="text-lg font-semibold mb-4">Alasan Tidak Hadir</h2>
+            <textarea 
+               value={alasan} 
+               onChange={e => setAlasan(e.target.value)} 
+               placeholder="Tuliskan alasan Anda..."
+               className="w-full px-3 py-2 border border-border rounded-lg bg-input-background focus:ring-2 focus:ring-primary focus:outline-none resize-none mb-4"
+               rows={3}
+            />
+            <div className="flex gap-3">
+              <button onClick={() => setReasonModal({ id: 0, show: false })} className="flex-1 py-2 rounded-lg border border-border hover:bg-muted transition-colors">Batal</button>
+              <button onClick={() => {
+                  confirmKehadiran(reasonModal.id, 'tidak_hadir', alasan);
+                  setReasonModal({ id: 0, show: false });
+              }} className="flex-1 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">Kirim</button>
             </div>
           </div>
         </div>

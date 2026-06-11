@@ -61,17 +61,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/pembayaran-iuran',                      [\App\Http\Controllers\PembayaranIuranController::class, 'store'])->middleware('permission:pembayaran,create')->name('pembayaran.store');
 
     // ─── Agenda ───────────────────────────────────────────────────────────────
-    Route::get('/agenda', [AgendaController::class, 'index'])->middleware('permission:agenda,view')->name('agenda');
-    Route::post('/agenda',             [AgendaController::class, 'store'])->middleware('permission:agenda,create')->name('agenda.store');
-    Route::patch('/agenda/{agenda}',   [AgendaController::class, 'update'])->middleware('permission:agenda,update')->name('agenda.update');
-    Route::delete('/agenda/{agenda}',  [AgendaController::class, 'destroy'])->middleware('permission:agenda,delete')->name('agenda.destroy');
+    Route::get('/agenda',             [AgendaController::class, 'index'])->middleware('permission:agenda,view')->name('agenda');
+    Route::post('/agenda',            [AgendaController::class, 'store'])->middleware('permission:agenda,create')->name('agenda.store');
+    Route::patch('/agenda/{agenda}',  [AgendaController::class, 'update'])->middleware('permission:agenda,update')->name('agenda.update');
+    Route::delete('/agenda/{agenda}', [AgendaController::class, 'destroy'])->middleware('permission:agenda,delete')->name('agenda.destroy');
+    Route::post('/agenda/{agenda}/konfirmasi', [AgendaController::class, 'konfirmasi'])->name('agenda.konfirmasi');
 
     // ─── Forum ────────────────────────────────────────────────────────────────
     Route::get('/forum',                              [DiskusiController::class, 'index'])->middleware('permission:forum,view')->name('forum');
     Route::post('/forum',                             [DiskusiController::class, 'store'])->middleware('permission:forum,create')->name('diskusi.store');
     Route::patch('/forum/{diskusi}',                  [DiskusiController::class, 'update'])->middleware('permission:forum,update')->name('diskusi.update');
     Route::delete('/forum/{diskusi}',                 [DiskusiController::class, 'destroy'])->middleware('permission:forum,delete')->name('diskusi.destroy');
-    Route::post('/forum/{diskusi}/like',              [DiskusiController::class, 'like'])->middleware('permission:forum,like')->name('diskusi.like');
+    Route::post('/forum/{diskusi}/status',            [DiskusiController::class, 'toggleStatus'])->middleware('permission:forum,view')->name('diskusi.status');
+    Route::post('/forum/reaction',                    [DiskusiController::class, 'toggleReaction'])->middleware('permission:forum,like')->name('diskusi.reaction');
     Route::post('/forum/{diskusi}/komentar',          [DiskusiController::class, 'storeKomentar'])->middleware('permission:forum,comment')->name('diskusi.komentar.store');
 
     // ─── Galeri ───────────────────────────────────────────────────────────────
@@ -79,19 +81,36 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/galeri',            [GaleriController::class, 'store'])->middleware('permission:galeri,create')->name('galeri.store');
     Route::patch('/galeri/{galeri}',  [GaleriController::class, 'update'])->middleware('permission:galeri,update')->name('galeri.update');
     Route::delete('/galeri/{galeri}', [GaleriController::class, 'destroy'])->middleware('permission:galeri,delete')->name('galeri.destroy');
+    Route::delete('/galeri/foto/{foto}', [GaleriController::class, 'destroyFoto'])->middleware('permission:galeri,update')->name('galeri.foto.destroy');
 
     // ─── Voting ───────────────────────────────────────────────────────────────
     Route::get('/voting',                [VotingController::class, 'index'])->middleware('permission:voting,view')->name('voting');
+    Route::get('/voting/{voting}/hasil', [VotingController::class, 'hasil'])->middleware('permission:voting,view')->name('voting.hasil');
     Route::post('/voting/{voting}/vote', [VotingController::class, 'vote'])->middleware('permission:voting,vote')->name('voting.vote');
     Route::post('/voting',              [VotingController::class, 'store'])->middleware('permission:voting,create')->name('voting.store');
     Route::patch('/voting/{voting}',    [VotingController::class, 'update'])->middleware('permission:voting,update')->name('voting.update');
     Route::delete('/voting/{voting}',   [VotingController::class, 'destroy'])->middleware('permission:voting,delete')->name('voting.destroy');
 
+    // ─── Surat Menyurat ───────────────────────────────────────────────────────
+    Route::get('/surat',             [\App\Http\Controllers\SuratMenyuratController::class, 'index'])->middleware('permission:surat,view')->name('surat.index');
+    Route::post('/surat',            [\App\Http\Controllers\SuratMenyuratController::class, 'store'])->middleware('permission:surat,create')->name('surat.store');
+    Route::patch('/surat/{surat}',   [\App\Http\Controllers\SuratMenyuratController::class, 'update'])->middleware('permission:surat,update')->name('surat.update');
+    Route::delete('/surat/{surat}',  [\App\Http\Controllers\SuratMenyuratController::class, 'destroy'])->middleware('permission:surat,delete')->name('surat.destroy');
+    Route::get('/surat/{surat}/cetak', [\App\Http\Controllers\SuratMenyuratController::class, 'cetak'])->middleware('permission:surat,view')->name('surat.cetak');
+
     // ─── Marketplace ──────────────────────────────────────────────────────────
+    Route::get('/marketplace/pesanan',               [\App\Http\Controllers\PesananMarketplaceController::class, 'index'])->middleware('permission:marketplace,view')->name('marketplace.pesanan');
+    Route::patch('/marketplace/pesanan/{pesanan}',   [\App\Http\Controllers\PesananMarketplaceController::class, 'update'])->middleware('permission:marketplace,update')->name('marketplace.pesanan.update');
+
     Route::get('/marketplace',                       [MarketplaceController::class, 'index'])->middleware('permission:marketplace,view')->name('marketplace');
+    Route::get('/marketplace/{marketplace}',         [MarketplaceController::class, 'show'])->middleware('permission:marketplace,view')->name('marketplace.show');
+    Route::post('/marketplace/{marketplace}/pesan',  [\App\Http\Controllers\PesananMarketplaceController::class, 'store'])->middleware('permission:marketplace,create')->name('marketplace.pesan');
     Route::post('/marketplace',                      [MarketplaceController::class, 'store'])->middleware('permission:marketplace,create')->name('marketplace.store');
     Route::post('/marketplace/{marketplace}/update', [MarketplaceController::class, 'update'])->middleware('permission:marketplace,update')->name('marketplace.update');
     Route::delete('/marketplace/{marketplace}',      [MarketplaceController::class, 'destroy'])->middleware('permission:marketplace,delete')->name('marketplace.destroy');
+    Route::post('/marketplace/{marketplace}/like',   [MarketplaceController::class, 'toggleLike'])->middleware('permission:marketplace,view')->name('marketplace.like');
+    Route::post('/marketplace/pesanan/{pesanan}/chat', [\App\Http\Controllers\PesananMarketplaceController::class, 'chat'])->middleware('permission:marketplace,view')->name('marketplace.pesanan.chat');
+    Route::post('/marketplace/pesanan/{pesanan}/read-chat', [\App\Http\Controllers\PesananMarketplaceController::class, 'readChat'])->middleware('permission:marketplace,view')->name('marketplace.pesanan.readchat');
 
     // ─── Laporan ──────────────────────────────────────────────────────────────
     Route::get('/laporan', fn() => Inertia::render('Laporan/Index'))->middleware('permission:laporan,view')->name('laporan');
@@ -103,6 +122,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/roles/{role}',   [RoleController::class, 'update'])->middleware('permission:roles,update')->name('pengaturan.roles.update');
         Route::delete('/roles/{role}',  [RoleController::class, 'destroy'])->middleware('permission:roles,delete')->name('pengaturan.roles.destroy');
     });
+
+    // ─── Notifikasi & Pengumuman ──────────────────────────────────────────────
+    Route::post('/notifications/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markOneAsRead'])->name('notifications.read.one');
+    Route::post('/pengumuman', [\App\Http\Controllers\NotificationController::class, 'sendPengumuman'])->name('pengumuman.send');
 });
 
 Route::middleware('auth')->group(function () {

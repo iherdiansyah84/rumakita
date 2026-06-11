@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { router, usePage } from "@inertiajs/react";
+import { Link, router, usePage } from "@inertiajs/react";
 import { ShoppingBag, Search, MapPin, Clock, Heart, Plus, X, Pencil, Trash2 } from "lucide-react";
 
 type Produk = {
@@ -10,8 +10,11 @@ type Produk = {
   deskripsi: string | null;
   harga: number;
   kategori: string;
-  gambar: string | null;
+  tipe_iklan: "Jual" | "Sewa";
+  gambar: string[];
   status: "active" | "sold";
+  likes_count?: number;
+  is_liked?: boolean;
   created_at: string;
 };
 
@@ -20,7 +23,7 @@ type Props = { produk: Produk[] };
 
 const KATEGORI = ["Furniture", "Elektronik", "Tanaman", "Olahraga", "Jasa", "Lainnya"];
 
-const emptyForm = { judul: "", deskripsi: "", harga: "", kategori: "Lainnya", status: "active" as const };
+const emptyForm = { judul: "", deskripsi: "", harga: "", kategori: "Lainnya", tipe_iklan: "Jual" as const, status: "active" as const };
 
 function formatRp(val: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(val);
@@ -42,7 +45,7 @@ export function MarketplaceModule({ produk = [] }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Produk | null>(null);
   const [form, setForm] = useState(emptyForm);
-  const [gambarFile, setGambarFile] = useState<File | null>(null);
+  const [gambarFiles, setGambarFiles] = useState<File[]>([]);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -56,7 +59,7 @@ export function MarketplaceModule({ produk = [] }: Props) {
   function openCreate() {
     setEditing(null);
     setForm(emptyForm);
-    setGambarFile(null);
+    setGambarFiles([]);
     setErrors({});
     setShowModal(true);
   }
@@ -68,9 +71,10 @@ export function MarketplaceModule({ produk = [] }: Props) {
       deskripsi: p.deskripsi ?? "",
       harga:     String(p.harga),
       kategori:  p.kategori,
+      tipe_iklan: p.tipe_iklan,
       status:    p.status,
     });
-    setGambarFile(null);
+    setGambarFiles([]);
     setErrors({});
     setShowModal(true);
   }
@@ -79,7 +83,7 @@ export function MarketplaceModule({ produk = [] }: Props) {
     e.preventDefault();
     const data = new FormData();
     Object.entries(form).forEach(([k, v]) => data.append(k, v));
-    if (gambarFile) data.append("gambar", gambarFile);
+    gambarFiles.forEach((file) => data.append("gambar[]", file));
 
     if (editing) {
       router.post(`/marketplace/${editing.id}/update`, data, {
@@ -108,13 +112,22 @@ export function MarketplaceModule({ produk = [] }: Props) {
           <h1 className="text-2xl font-semibold text-foreground mb-2">Marketplace Warga</h1>
           <p className="text-muted-foreground">Jual beli antar warga perumahan</p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Pasang Iklan
-        </button>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/marketplace/pesanan"
+            className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground font-medium rounded-lg hover:bg-secondary/90 transition-colors shadow-sm"
+          >
+            <ShoppingBag className="w-5 h-5" />
+            Pesanan
+          </Link>
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
+          >
+            <Plus className="w-5 h-5" />
+            Pasang Iklan
+          </button>
+        </div>
       </div>
 
       <div className="bg-card rounded-xl border border-border p-4">
@@ -154,9 +167,16 @@ export function MarketplaceModule({ produk = [] }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((p) => (
           <div key={p.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
-            <div className="relative h-48 overflow-hidden bg-muted">
-              {p.gambar ? (
-                <img src={p.gambar} alt={p.judul} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            <Link href={`/marketplace/${p.id}`} className="relative h-48 overflow-hidden bg-muted block cursor-pointer">
+              {p.gambar && p.gambar.length > 0 ? (
+                <>
+                  <img src={p.gambar[0]} alt={p.judul} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  {p.gambar.length > 1 && (
+                    <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/60 text-white text-xs rounded-lg pointer-events-none">
+                      1 / {p.gambar.length}
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                   <ShoppingBag className="w-16 h-16 opacity-30" />
@@ -166,24 +186,40 @@ export function MarketplaceModule({ produk = [] }: Props) {
                 <Heart className="w-5 h-5 text-muted-foreground" />
               </button>
               <span className="absolute top-3 left-3 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
-                {p.kategori}
+                {p.tipe_iklan} - {p.kategori}
               </span>
               {p.status === "sold" && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <span className="text-white font-semibold text-lg">TERJUAL</span>
                 </div>
               )}
-            </div>
+            </Link>
             <div className="p-4">
-              <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">{p.judul}</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
+                <Link href={`/marketplace/${p.id}`} className="hover:text-primary transition-colors">
+                  {p.judul}
+                </Link>
+              </h3>
               <p className="text-2xl font-bold text-primary mb-3">{formatRp(p.harga)}</p>
               <div className="flex items-center justify-between pt-3 border-t border-border">
-                <div>
-                  <p className="text-sm font-medium text-foreground">{p.penjual}</p>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                    <Clock className="w-3 h-3" />
-                    <span>{timeAgo(p.created_at)}</span>
+                <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      <span>{timeAgo(p.created_at)}</span>
+                    </div>
+                    <button 
+                      onClick={(e) => { 
+                        e.preventDefault(); 
+                        router.post(`/marketplace/${p.id}/like`, {}, { preserveScroll: true });
+                      }}
+                      className={`flex items-center gap-1 hover:text-red-500 transition-colors ${p.is_liked ? 'text-red-500' : ''}`}
+                    >
+                      <Heart className={`w-4 h-4 ${p.is_liked ? 'fill-current' : ''}`} />
+                      <span>{p.likes_count || 0}</span>
+                    </button>
                   </div>
+                  <span className="font-medium text-foreground">{p.penjual}</span>
                 </div>
                 {auth.user.id === p.user_id && (
                   <div className="flex gap-1">
@@ -230,6 +266,16 @@ export function MarketplaceModule({ produk = [] }: Props) {
                   </select>
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Tipe Iklan *</label>
+                  <select value={form.tipe_iklan} onChange={(e) => setForm({ ...form, tipe_iklan: e.target.value as typeof form.tipe_iklan })}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-ring">
+                    <option value="Jual">Jual</option>
+                    <option value="Sewa">Sewa</option>
+                  </select>
+                </div>
+              </div>
               {editing && (
                 <div>
                   <label className="block text-sm font-medium mb-1">Status</label>
@@ -241,8 +287,8 @@ export function MarketplaceModule({ produk = [] }: Props) {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium mb-1">Foto Produk</label>
-                <input type="file" accept="image/*" onChange={(e) => setGambarFile(e.target.files?.[0] ?? null)}
+                <label className="block text-sm font-medium mb-1">Foto Produk (Bisa lebih dari 1)</label>
+                <input type="file" accept="image/*" multiple onChange={(e) => setGambarFiles(e.target.files ? Array.from(e.target.files) : [])}
                   className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-primary file:text-primary-foreground hover:file:bg-primary/90" />
               </div>
               <div className="flex gap-3 pt-2">

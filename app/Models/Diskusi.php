@@ -14,11 +14,12 @@ class Diskusi extends Model
     protected $table = 'diskusi';
 
     protected $fillable = [
-        'perumahan_id', 'user_id', 'judul', 'konten', 'kategori', 'likes',
+        'perumahan_id', 'user_id', 'judul', 'konten', 'kategori', 'status', 'lampiran',
     ];
 
     protected $casts = [
         'likes' => 'integer',
+        'lampiran' => 'array',
     ];
 
     public function user(): BelongsTo
@@ -29,5 +30,10 @@ class Diskusi extends Model
     public function komentar(): HasMany
     {
         return $this->hasMany(KomentarDiskusi::class);
+    }
+
+    public function reactions()
+    {
+        return $this->morphMany(Reaction::class, 'reactionable');
     }
 }
