@@ -12,6 +12,15 @@ type Surat = {
       blok_rumah?: string;
       nomor_rumah?: string;
   };
+  warga?: {
+      id: number;
+      nama: string;
+      blok?: string;
+  };
+  anggota_keluarga?: {
+      id: number;
+      nama: string;
+  };
   jenis_surat: string;
   keperluan: string;
   keterangan_tambahan: string | null;
@@ -22,8 +31,20 @@ type Surat = {
   created_at: string;
 };
 
+type AnggotaKeluarga = {
+  id: number;
+  nama: string;
+};
+
+type Warga = {
+  id: number;
+  nama: string;
+  anggota_keluarga?: AnggotaKeluarga[];
+};
+
 type Props = {
   suratList: Surat[];
+  pilihanWarga?: Warga[];
 };
 
 const JENIS_SURAT_OPTIONS = [
@@ -51,12 +72,14 @@ const statusIcon = {
 };
 
 const emptyForm = {
+  warga_id: null as number | null,
+  anggota_keluarga_id: null as number | null,
   jenis_surat: JENIS_SURAT_OPTIONS[0],
   keperluan: "",
   keterangan_tambahan: "",
 };
 
-export function SuratModule({ suratList = [] }: Props) {
+export function SuratModule({ suratList = [], pilihanWarga = [] }: Props) {
   const { roleName, can } = useAuth();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
@@ -173,10 +196,12 @@ export function SuratModule({ suratList = [] }: Props) {
                       {s.nomor_surat && <div className="text-xs font-medium text-primary mt-1">No: {s.nomor_surat}</div>}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-medium text-foreground">{s.user?.name}</div>
-                      {(s.user?.blok_rumah || s.user?.nomor_rumah) && (
-                        <div className="text-xs text-muted-foreground">Blok {s.user?.blok_rumah} No. {s.user?.nomor_rumah}</div>
-                      )}
+                      <div className="font-medium text-foreground">
+                        {s.anggota_keluarga?.nama || s.warga?.nama || s.user?.name}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {s.warga?.blok ? `Blok ${s.warga.blok}` : (s.user?.blok_rumah ? `Blok ${s.user.blok_rumah} No. ${s.user.nomor_rumah}` : '-')}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusColor[s.status]}`}>
@@ -221,6 +246,35 @@ export function SuratModule({ suratList = [] }: Props) {
               </button>
             </div>
             <form onSubmit={handleCreateSubmit} className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Pemohon Surat <span className="text-red-500">*</span></label>
+                <select 
+                    value={form.anggota_keluarga_id ? `A_${form.anggota_keluarga_id}_W_${form.warga_id}` : (form.warga_id ? `W_${form.warga_id}` : '')}
+                    onChange={e => {
+                        const val = e.target.value;
+                        if (val.startsWith('W_')) {
+                            setForm({...form, warga_id: Number(val.replace('W_', '')), anggota_keluarga_id: null});
+                        } else if (val.startsWith('A_')) {
+                            const parts = val.split('_');
+                            setForm({...form, warga_id: Number(parts[3]), anggota_keluarga_id: Number(parts[1])});
+                        } else {
+                            setForm({...form, warga_id: null, anggota_keluarga_id: null});
+                        }
+                    }}
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-input-background focus:ring-2 focus:ring-primary focus:outline-none"
+                    required
+                >
+                    <option value="">Pilih Pemohon...</option>
+                    {pilihanWarga.map(w => (
+                        <optgroup key={w.id} label={`Keluarga ${w.nama}`}>
+                            <option value={`W_${w.id}`}>{w.nama} (Kepala Keluarga)</option>
+                            {w.anggota_keluarga?.map(a => (
+                                <option key={a.id} value={`A_${a.id}_W_${w.id}`}>{a.nama} (Anggota Keluarga)</option>
+                            ))}
+                        </optgroup>
+                    ))}
+                </select>
+              </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Jenis Surat <span className="text-red-500">*</span></label>
                 <select 

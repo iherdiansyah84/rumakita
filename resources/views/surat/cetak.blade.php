@@ -90,9 +90,18 @@
     <div class="container">
         <!-- KOP SURAT -->
         <div class="header">
-            <h2>RUKUN TETANGGA (RT) / RUKUN WARGA (RW)</h2>
+            <h2>
+                RUKUN TETANGGA (RT) {{ auth()->user()->perumahan->rt ?? '......' }} / 
+                RUKUN WARGA (RW) {{ auth()->user()->perumahan->rw ?? '......' }}
+            </h2>
             <h3>PERUMAHAN {{ strtoupper(auth()->user()->perumahan->nama ?? 'WARGA') }}</h3>
-            <p>Alamat: {{ auth()->user()->perumahan->alamat ?? '__________________________' }}</p>
+            <p>
+                Kelurahan {{ auth()->user()->perumahan->kelurahan ?? '......................' }}, 
+                Kecamatan {{ auth()->user()->perumahan->kecamatan ?? '......................' }}, 
+                {{ auth()->user()->perumahan->kota ?? '......................' }}, 
+                {{ auth()->user()->perumahan->provinsi ?? '' }} 
+                {{ auth()->user()->perumahan->kode_pos ?? '' }}
+            </p>
         </div>
 
         <!-- JUDUL SURAT -->
@@ -108,11 +117,31 @@
             <table class="data-table">
                 <tr>
                     <td>Nama Lengkap</td>
-                    <td>: <strong>{{ $surat->user->name }}</strong></td>
+                    <td>: <strong>{{ strtoupper($pemohon->nama ?? $surat->user->name) }}</strong></td>
                 </tr>
                 <tr>
-                    <td>Nomor Rumah</td>
-                    <td>: {{ $surat->user->blok_rumah ?? '-' }} / {{ $surat->user->nomor_rumah ?? '-' }}</td>
+                    <td>No. KTP / NIK</td>
+                    <td>: {{ $pemohon->nik ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Tempat, Tgl. Lahir</td>
+                    <td>: {{ $pemohon->tempat_lahir ?? '-' }}, {{ $pemohon->tanggal_lahir ? \Carbon\Carbon::parse($pemohon->tanggal_lahir)->translatedFormat('d F Y') : '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Jenis Kelamin</td>
+                    <td>: {{ $pemohon->jenis_kelamin ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Agama</td>
+                    <td>: {{ $pemohon->agama ?? $warga->agama ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Pekerjaan</td>
+                    <td>: {{ $pemohon->pekerjaan ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Alamat</td>
+                    <td>: Blok {{ $warga->blok ?? '-' }} / Perumahan {{ $warga->perumahan->nama ?? 'Rumakita' }}</td>
                 </tr>
                 <tr>
                     <td>Keperluan</td>

@@ -13,6 +13,8 @@ class SuratMenyurat extends Model
     protected $fillable = [
         'perumahan_id',
         'user_id',
+        'warga_id',
+        'anggota_keluarga_id',
         'jenis_surat',
         'keperluan',
         'keterangan_tambahan',
@@ -25,5 +27,15 @@ class SuratMenyurat extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function warga(): BelongsTo
+    {
+        return $this->belongsTo(Warga::class);
+    }
+
+    public function anggotaKeluarga(): BelongsTo
+    {
+        return $this->belongsTo(AnggotaKeluarga::class);
     }
 }

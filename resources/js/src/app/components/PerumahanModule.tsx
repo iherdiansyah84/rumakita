@@ -12,13 +12,30 @@ type Perumahan = {
   total_unit: number;
   status: "active" | "inactive";
   warga_count: number;
+  rt: string | null;
+  rw: string | null;
+  kelurahan: string | null;
+  kecamatan: string | null;
+  kota: string | null;
+  provinsi: string | null;
+  kode_pos: string | null;
 };
 
 type Props = { perumahan: Perumahan[] };
 
 const emptyForm = {
   nama: "", lokasi: "", admin_nama: "",
-  telepon: "", email: "", total_unit: "", status: "active" as const,
+  telepon: "",
+  email: "",
+  total_unit: 100,
+  status: "active" as const,
+  rt: "",
+  rw: "",
+  kelurahan: "",
+  kecamatan: "",
+  kota: "",
+  provinsi: "",
+  kode_pos: "",
 };
 
 export function PerumahanModule({ perumahan = [] }: Props) {
@@ -41,10 +58,17 @@ export function PerumahanModule({ perumahan = [] }: Props) {
       nama:       p.nama,
       lokasi:     p.lokasi,
       admin_nama: p.admin_nama,
-      telepon:    p.telepon ?? "",
-      email:      p.email ?? "",
-      total_unit: String(p.total_unit),
-      status:     p.status,
+      telepon: p.telepon || "",
+      email: p.email || "",
+      total_unit: p.total_unit,
+      status: p.status,
+      rt: p.rt || "",
+      rw: p.rw || "",
+      kelurahan: p.kelurahan || "",
+      kecamatan: p.kecamatan || "",
+      kota: p.kota || "",
+      provinsi: p.provinsi || "",
+      kode_pos: p.kode_pos || "",
     });
     setErrors({});
     setShowModal(true);
@@ -130,16 +154,21 @@ export function PerumahanModule({ perumahan = [] }: Props) {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-xl font-semibold text-foreground">{p.nama}</h3>
-                      <span className={`px-2 py-0.5 text-xs font-medium rounded ${
-                        p.status === "active" ? "bg-teal-100 text-teal-700" : "bg-gray-100 text-gray-600"
-                      }`}>
-                        {p.status === "active" ? "Aktif" : "Nonaktif"}
-                      </span>
+                      <h3 className="font-semibold text-lg">{p.nama}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${p.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                          {p.status === "active" ? "Aktif" : "Non-Aktif"}
+                        </span>
+                        {(p.rt || p.rw) && (
+                          <span className="text-xs bg-muted px-2 py-0.5 rounded font-medium text-muted-foreground border border-border">
+                              RT {p.rt || '-'} / RW {p.rw || '-'}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                       <MapPin className="w-4 h-4" />
-                      <span>{p.lokasi}</span>
+                      <span className="line-clamp-2">{p.lokasi} {p.kota ? `- ${p.kota}` : ''}</span>
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                       <div>
@@ -221,6 +250,45 @@ export function PerumahanModule({ perumahan = [] }: Props) {
                     className="w-full px-3 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
               </div>
+              
+              <div className="border-t border-border pt-4 mt-2">
+                <h3 className="font-medium text-sm text-foreground mb-3 flex items-center gap-2"><MapPin className="w-4 h-4"/> Identitas Wilayah (Opsional)</h3>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">RT</label>
+                    <input type="text" value={form.rt} onChange={(e) => setForm({ ...form, rt: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-input-background focus:ring-2 focus:ring-primary focus:outline-none" placeholder="001" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">RW</label>
+                    <input type="text" value={form.rw} onChange={(e) => setForm({ ...form, rw: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-input-background focus:ring-2 focus:ring-primary focus:outline-none" placeholder="005" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Kelurahan / Desa</label>
+                    <input type="text" value={form.kelurahan} onChange={(e) => setForm({ ...form, kelurahan: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-input-background focus:ring-2 focus:ring-primary focus:outline-none" placeholder="Sukamaju" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Kecamatan</label>
+                    <input type="text" value={form.kecamatan} onChange={(e) => setForm({ ...form, kecamatan: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-input-background focus:ring-2 focus:ring-primary focus:outline-none" placeholder="Cilodong" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Kota / Kabupaten</label>
+                    <input type="text" value={form.kota} onChange={(e) => setForm({ ...form, kota: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-input-background focus:ring-2 focus:ring-primary focus:outline-none" placeholder="Depok" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Provinsi</label>
+                    <input type="text" value={form.provinsi} onChange={(e) => setForm({ ...form, provinsi: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-input-background focus:ring-2 focus:ring-primary focus:outline-none" placeholder="Jawa Barat" />
+                  </div>
+                  <div className="col-span-2 md:col-span-1">
+                    <label className="block text-sm font-medium mb-1">Kode Pos</label>
+                    <input type="text" value={form.kode_pos} onChange={(e) => setForm({ ...form, kode_pos: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-input-background focus:ring-2 focus:ring-primary focus:outline-none" placeholder="16415" />
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">Status</label>
                 <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as typeof form.status })}

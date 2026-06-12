@@ -14,6 +14,7 @@ class Perumahan extends Model
 
     protected $fillable = [
         'nama', 'lokasi', 'admin_nama', 'telepon', 'email', 'total_unit', 'status',
+        'rt', 'rw', 'kelurahan', 'kecamatan', 'kota', 'provinsi', 'kode_pos'
     ];
 
     public function warga(): HasMany
