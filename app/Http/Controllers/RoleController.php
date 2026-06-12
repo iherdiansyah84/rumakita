@@ -26,6 +26,9 @@ class RoleController extends Controller
     {
         $roles = Role::withCount('users')
             ->with('permissions')
+            ->when(auth()->user()->role->name !== 'super_admin', function ($query) {
+                $query->where('name', '!=', 'super_admin');
+            })
             ->latest()
             ->get()
             ->map(fn(Role $role) => [
