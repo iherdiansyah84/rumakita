@@ -34,6 +34,7 @@ class PerumahanController extends Controller
             'kota'       => 'nullable|string|max:100',
             'provinsi'   => 'nullable|string|max:100',
             'kode_pos'   => 'nullable|string|max:20',
+            'nama_ketua_rt' => 'nullable|string|max:255',
         ]);
 
         Perumahan::create($validated);
@@ -58,6 +59,7 @@ class PerumahanController extends Controller
             'kota'       => 'nullable|string|max:100',
             'provinsi'   => 'nullable|string|max:100',
             'kode_pos'   => 'nullable|string|max:20',
+            'nama_ketua_rt' => 'nullable|string|max:255',
         ]);
 
         $perumahan->update($validated);

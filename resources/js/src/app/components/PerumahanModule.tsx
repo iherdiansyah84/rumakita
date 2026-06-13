@@ -19,6 +19,7 @@ type Perumahan = {
   kota: string | null;
   provinsi: string | null;
   kode_pos: string | null;
+  nama_ketua_rt: string | null;
 };
 
 type Props = { perumahan: Perumahan[] };
@@ -36,6 +37,7 @@ const emptyForm = {
   kota: "",
   provinsi: "",
   kode_pos: "",
+  nama_ketua_rt: "",
 };
 
 export function PerumahanModule({ perumahan = [] }: Props) {
@@ -69,6 +71,7 @@ export function PerumahanModule({ perumahan = [] }: Props) {
       kota: p.kota || "",
       provinsi: p.provinsi || "",
       kode_pos: p.kode_pos || "",
+      nama_ketua_rt: p.nama_ketua_rt || "",
     });
     setErrors({});
     setShowModal(true);
@@ -257,6 +260,10 @@ export function PerumahanModule({ perumahan = [] }: Props) {
                   <div>
                     <label className="block text-sm font-medium mb-1">RT</label>
                     <input type="text" value={form.rt} onChange={(e) => setForm({ ...form, rt: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-input-background focus:ring-2 focus:ring-primary focus:outline-none" placeholder="001" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Nama Ketua RT</label>
+                    <input type="text" value={form.nama_ketua_rt} onChange={(e) => setForm({ ...form, nama_ketua_rt: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-input-background focus:ring-2 focus:ring-primary focus:outline-none" placeholder="Nama Ketua RT" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">RW</label>
