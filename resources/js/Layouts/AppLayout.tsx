@@ -6,13 +6,14 @@ import { Header } from "../src/app/components/Header";
 export default function AppLayout({ children }: PropsWithChildren) {
     const { auth } = usePage<{
         auth: {
-            user: { name: string; role_name: string; role_label: string; email: string } | null;
+            user: { name: string; role_name: string; role_label: string; email: string; perumahan_name: string } | null;
         };
     }>().props;
 
     const user = auth?.user;
     const userName = user?.name || "Guest";
     const userRole = user?.role_label || "Guest";
+    const perumahanName = user?.perumahan_name || "RumaKita";
 
     const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -23,7 +24,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
                 <Header 
                     userName={userName} 
                     role={userRole} 
-                    perumahan="Griya Asri Residence" 
+                    perumahan={perumahanName} 
                     onMenuClick={() => setIsMobileOpen(true)} 
                 />
                 <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>

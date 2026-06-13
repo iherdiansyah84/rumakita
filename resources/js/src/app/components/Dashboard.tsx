@@ -1,5 +1,6 @@
 import { StatCard } from "./StatCard";
 import { Users, Wallet, Calendar, TrendingUp, AlertCircle, CheckCircle, Clock, Building2 } from "lucide-react";
+import { usePage } from "@inertiajs/react";
 
 interface DashboardProps {
   stats: {
@@ -25,11 +26,14 @@ export function Dashboard({ stats, pengumuman, recentActivities }: DashboardProp
     }).format(angka);
   };
 
+  const { auth } = usePage<any>().props;
+  const perumahanName = auth?.user?.perumahan_name || "RumaKita";
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-foreground mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Selamat datang di sistem kelola warga RumaKita</p>
+        <p className="text-muted-foreground">Selamat datang di sistem kelola warga {perumahanName}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
