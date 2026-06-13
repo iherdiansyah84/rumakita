@@ -62,10 +62,7 @@ export default function Login({ status, canResetPassword, totalWarga = 0 }: { st
                 <div className="w-full max-w-md relative z-10">
                     <div className="mb-10">
                         <div className="flex items-center gap-2 mb-8">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#3B6B55]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
+                            <img src="/logo.png" alt="RumaKita" className="h-8 w-8 rounded-md" />
                             <span className="text-2xl font-bold text-[#3B6B55] tracking-tight">RumaKita</span>
                         </div>
                         <h2 className="text-3xl font-bold text-slate-900 mb-2">Selamat Datang Kembali di<br/>RumaKita</h2>

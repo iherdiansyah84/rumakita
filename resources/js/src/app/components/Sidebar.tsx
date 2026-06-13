@@ -84,8 +84,8 @@ export function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps) {
 
       <div className={`p-6 border-b border-border flex ${isCollapsed ? "justify-center px-0" : ""}`}>
         <div className="flex items-center gap-3 overflow-hidden">
-          <div className="min-w-[40px] w-10 h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
-            <Building2 className="w-6 h-6 text-primary-foreground" />
+          <div className="min-w-[40px] w-10 h-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-primary/10">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
           </div>
           <div className={`transition-opacity duration-200 whitespace-nowrap ${isCollapsed ? "opacity-0 w-0 hidden" : "opacity-100"}`}>
             <h2 className="text-lg font-semibold text-foreground">RumaKita</h2>
