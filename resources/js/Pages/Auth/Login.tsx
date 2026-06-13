@@ -168,13 +168,7 @@ export default function Login({ status, canResetPassword, totalWarga = 0 }: { st
 
 
 
-                    <div className="mt-10 text-center text-sm text-slate-500">
-                        Belum punya akun?{' '}
-                        {/* We use route('register') if it exists, otherwise just '#' */}
-                        <Link href={route('register')} className="font-semibold text-[#3B6B55] hover:underline">
-                            Daftar Sekarang
-                        </Link>
-                    </div>
+
                 </div>
             </div>
         </div>
