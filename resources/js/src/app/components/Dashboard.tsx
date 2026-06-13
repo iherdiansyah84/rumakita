@@ -1,19 +1,29 @@
 import { StatCard } from "./StatCard";
 import { Users, Wallet, Calendar, TrendingUp, AlertCircle, CheckCircle, Clock, Building2 } from "lucide-react";
 
-export function Dashboard() {
-  const announcements = [
-    { id: 1, title: "Gotong Royong Minggu Depan", date: "5 Mei 2026", type: "event" },
-    { id: 2, title: "Iuran Bulan Mei Dibuka", date: "1 Mei 2026", type: "payment" },
-    { id: 3, title: "Rapat RT Minggu Ini", date: "3 Mei 2026", type: "meeting" },
-  ];
+interface DashboardProps {
+  stats: {
+    total_warga: number;
+    saldo_kas: number;
+    agenda_aktif: number;
+    surat_pending: number;
+    kegiatan_bulan_ini: number;
+    total_perumahan: number;
+  };
+  pengumuman: any[];
+  recentActivities: any[];
+}
 
-  const recentActivities = [
-    { id: 1, user: "Budi Santoso", action: "Membayar iuran kebersihan", time: "2 jam lalu", status: "success" },
-    { id: 2, user: "Siti Aminah", action: "Mengajukan surat domisili", time: "3 jam lalu", status: "pending" },
-    { id: 3, user: "Ahmad Hidayat", action: "Voting kegiatan 17 Agustus", time: "5 jam lalu", status: "success" },
-    { id: 4, user: "Dewi Lestari", action: "Upload foto kegiatan posyandu", time: "1 hari lalu", status: "success" },
-  ];
+export function Dashboard({ stats, pengumuman, recentActivities }: DashboardProps) {
+  // Format rupiah
+  const formatRupiah = (angka: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(angka);
+  };
 
   return (
     <div className="space-y-6">
@@ -25,29 +35,26 @@ export function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Warga"
-          value="1,247"
+          value={stats?.total_warga?.toString() || "0"}
           icon={Users}
-          trend={{ value: "12% dari bulan lalu", isPositive: true }}
           color="primary"
         />
         <StatCard
           title="Saldo Kas RT"
-          value="Rp 45.2 Jt"
+          value={formatRupiah(stats?.saldo_kas || 0)}
           icon={Wallet}
-          trend={{ value: "8% dari bulan lalu", isPositive: true }}
           color="accent"
         />
         <StatCard
           title="Agenda Aktif"
-          value="8"
+          value={stats?.agenda_aktif?.toString() || "0"}
           icon={Calendar}
           color="secondary"
         />
         <StatCard
-          title="Iuran Terkumpul"
-          value="87%"
+          title="Surat Pending"
+          value={stats?.surat_pending?.toString() || "0"}
           icon={TrendingUp}
-          trend={{ value: "5% dari target", isPositive: true }}
           color="purple"
         />
       </div>
@@ -59,16 +66,18 @@ export function Dashboard() {
             <button className="text-sm text-primary hover:underline">Lihat Semua</button>
           </div>
           <div className="space-y-3">
-            {recentActivities.map((activity) => (
+            {recentActivities && recentActivities.length > 0 ? recentActivities.map((activity) => (
               <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors">
-                <div className={`w-2 h-2 rounded-full mt-2 ${activity.status === "success" ? "bg-teal-500" : "bg-amber-500"}`}></div>
+                <div className={`w-2 h-2 rounded-full mt-2 ${activity.status === "success" ? "bg-teal-500" : (activity.status === "pending" ? "bg-amber-500" : "bg-red-500")}`}></div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">{activity.user}</p>
                   <p className="text-sm text-muted-foreground">{activity.action}</p>
                 </div>
                 <span className="text-xs text-muted-foreground">{activity.time}</span>
               </div>
-            ))}
+            )) : (
+              <div className="p-3 text-sm text-muted-foreground text-center">Belum ada aktivitas.</div>
+            )}
           </div>
         </div>
 
@@ -78,12 +87,14 @@ export function Dashboard() {
             <h2 className="text-lg font-semibold text-foreground">Pengumuman</h2>
           </div>
           <div className="space-y-3">
-            {announcements.map((announcement) => (
+            {pengumuman && pengumuman.length > 0 ? pengumuman.map((announcement) => (
               <div key={announcement.id} className="p-4 bg-secondary/30 rounded-lg border border-secondary">
                 <h3 className="text-sm font-medium text-foreground mb-1">{announcement.title}</h3>
                 <p className="text-xs text-muted-foreground">{announcement.date}</p>
               </div>
-            ))}
+            )) : (
+              <div className="p-4 bg-muted/30 rounded-lg border border-border text-center text-sm text-muted-foreground">Belum ada pengumuman.</div>
+            )}
           </div>
           <button className="w-full mt-4 py-2 text-sm text-primary hover:bg-primary/10 rounded-lg transition-colors">
             Lihat Semua Pengumuman
@@ -94,26 +105,26 @@ export function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl p-6 text-white">
           <Building2 className="w-8 h-8 mb-3 opacity-90" />
-          <h3 className="text-lg font-semibold mb-1">Multi Perumahan</h3>
-          <p className="text-sm opacity-90 mb-3">Kelola 5 perumahan dalam 1 sistem</p>
+          <h3 className="text-lg font-semibold mb-1">Total Perumahan</h3>
+          <p className="text-sm opacity-90 mb-3">{stats?.total_perumahan || 1} Perumahan terdaftar</p>
           <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            Kelola Perumahan
+            Lihat Detail
           </button>
         </div>
 
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white">
           <CheckCircle className="w-8 h-8 mb-3 opacity-90" />
-          <h3 className="text-lg font-semibold mb-1">Gotong Royong</h3>
-          <p className="text-sm opacity-90 mb-3">8 kegiatan bulan ini</p>
+          <h3 className="text-lg font-semibold mb-1">Kegiatan Bulan Ini</h3>
+          <p className="text-sm opacity-90 mb-3">{stats?.kegiatan_bulan_ini || 0} kegiatan terjadwal</p>
           <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            Lihat Kegiatan
+            Lihat Agenda
           </button>
         </div>
 
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
           <Clock className="w-8 h-8 mb-3 opacity-90" />
-          <h3 className="text-lg font-semibold mb-1">Surat Digital</h3>
-          <p className="text-sm opacity-90 mb-3">15 permohonan pending</p>
+          <h3 className="text-lg font-semibold mb-1">Surat Masuk</h3>
+          <p className="text-sm opacity-90 mb-3">{stats?.surat_pending || 0} permohonan pending</p>
           <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
             Proses Surat
           </button>

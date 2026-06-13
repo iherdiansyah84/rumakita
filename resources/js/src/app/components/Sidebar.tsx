@@ -37,7 +37,12 @@ const pengaturanItems: Module[] = [
   { id: "roles",     href: "/pengaturan/roles",  icon: Shield,  label: "Kelola Role",     permission: "roles.view" },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isMobileOpen: boolean;
+  setIsMobileOpen: (open: boolean) => void;
+}
+
+export function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isPengaturanOpen, setIsPengaturanOpen] = useState(false);
   const { url } = usePage();
@@ -54,11 +59,25 @@ export function Sidebar() {
   }
 
   return (
-    <div className={`bg-card border-r border-border h-screen flex flex-col transition-all duration-300 relative ${isCollapsed ? "w-20" : "w-64"}`}>
+    <>
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          onClick={() => setIsMobileOpen(false)} 
+        />
+      )}
+      
+      {/* Sidebar Container */}
+      <div 
+        className={`bg-card border-r border-border h-screen flex flex-col transition-transform duration-300 fixed md:relative z-50 md:z-auto ${
+          isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        } ${isCollapsed ? "w-20" : "w-64"}`}
+      >
 
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-8 bg-primary text-primary-foreground p-1 rounded-full shadow-md z-10 hover:bg-primary/90 transition-colors"
+        className="hidden md:flex absolute -right-3 top-8 bg-primary text-primary-foreground p-1 rounded-full shadow-md z-10 hover:bg-primary/90 transition-colors"
       >
         {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
       </button>
@@ -170,5 +189,6 @@ export function Sidebar() {
         </button>
       </div>
     </div>
+    </>
   );
 }

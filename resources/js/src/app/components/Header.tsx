@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, Search, User, Megaphone, CheckCircle2 } from "lucide-react";
+import { Bell, Search, User, Megaphone, CheckCircle2, Menu } from "lucide-react";
 import { Link, usePage, router } from "@inertiajs/react";
 
 interface Notification {
@@ -29,9 +29,10 @@ interface HeaderProps {
   userName: string;
   role: string;
   perumahan: string;
+  onMenuClick?: () => void;
 }
 
-export function Header({ userName, role, perumahan }: HeaderProps) {
+export function Header({ userName, role, perumahan, onMenuClick }: HeaderProps) {
   const { auth } = usePage<PageProps>().props;
   const notifications = auth.user.unreadNotifications || [];
   const [showDropdown, setShowDropdown] = useState(false);
@@ -63,9 +64,18 @@ export function Header({ userName, role, perumahan }: HeaderProps) {
   const isAdmin = auth.user.role_name === 'admin' || auth.user.role_name === 'pengurus';
 
   return (
-    <div className="h-16 bg-card border-b border-border px-6 flex items-center justify-between">
-      <div className="flex items-center gap-4 flex-1">
-        <div className="relative flex-1 max-w-md">
+    <div className="h-16 bg-card border-b border-border px-4 md:px-6 flex items-center justify-between">
+      <div className="flex items-center gap-3 md:gap-4 flex-1">
+        {onMenuClick && (
+          <button 
+            onClick={onMenuClick}
+            className="md:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        )}
+        
+        <div className="relative flex-1 max-w-md hidden sm:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
@@ -75,7 +85,7 @@ export function Header({ userName, role, perumahan }: HeaderProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
         {isAdmin && (
           <button 
             onClick={() => setShowPengumumanModal(true)}
@@ -142,8 +152,8 @@ export function Header({ userName, role, perumahan }: HeaderProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-3 pl-4 border-l border-border">
-          <div className="text-right">
+        <div className="flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l border-border">
+          <div className="hidden sm:block text-right">
             <p className="text-sm font-medium text-foreground">{userName}</p>
             <p className="text-xs text-muted-foreground">{role} • {perumahan}</p>
           </div>
