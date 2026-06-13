@@ -16,6 +16,7 @@ return [
         'laporan'     => ['view', 'export'],
         'users'       => ['view', 'create', 'update', 'delete'],
         'roles'       => ['view', 'create', 'update', 'delete'],
+        'surat'       => ['view', 'create', 'update', 'delete', 'cetak'],
     ],
 
     'pengurus' => [
@@ -33,6 +34,7 @@ return [
         'laporan'     => ['view', 'export'],
         'users'       => ['view', 'create', 'update', 'delete'],
         'roles'       => ['view', 'create', 'update', 'delete'],
+        'surat'       => ['view', 'create', 'update', 'delete', 'cetak'],
     ],
 
     'warga' => [
@@ -47,5 +49,6 @@ return [
         'voting'      => ['view', 'vote'],
         'agenda'      => ['view'],
         'marketplace' => ['view', 'create', 'update', 'delete'],
+        'surat'       => ['view', 'create', 'update', 'delete', 'cetak'],
     ],
 ];
