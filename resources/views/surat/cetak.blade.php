@@ -161,12 +161,12 @@
 
         <!-- TANDA TANGAN -->
         <div class="signature">
-            <p>Dikeluarkan di: ............................</p>
+            <p>Dikeluarkan di: {{ auth()->user()->perumahan->kota ?? '............................' }}</p>
             <p>Pada Tanggal: {{ \Carbon\Carbon::parse($surat->updated_at)->translatedFormat('d F Y') }}</p>
             <br>
             <p><strong>Ketua RT</strong></p>
             <div class="signature-space"></div>
-            <p>( _______________________ )</p>
+            <p>( <span style="text-decoration: underline; font-weight: bold;">{{ auth()->user()->perumahan->nama_ketua_rt ?? '_______________________' }}</span> )</p>
         </div>
     </div>
 </body>
